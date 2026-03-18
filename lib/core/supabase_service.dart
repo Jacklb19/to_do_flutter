@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:path/path.dart' as p;
+import 'dart:async';
 import '../models/task_model.dart';
 
 class SupabaseService {
@@ -10,21 +11,38 @@ class SupabaseService {
 
   final _client = Supabase.instance.client;
 
-  // ─── Cached stream (single source of truth) ───
-  Stream<List<Task>>? _tasksStream;
+  // ─── Manual broadcast stream (no dependency on Supabase Realtime) ───
+  final _tasksController = StreamController<List<Task>>.broadcast();
+  List<Task> _cachedTasks = [];
+  bool _initialized = false;
 
   Stream<List<Task>> getTasksStream() {
-    _tasksStream ??= _client
-        .from('tasks')
-        .stream(primaryKey: ['id'])
-        .order('created_at', ascending: false)
-        .map((data) => data.map((json) => Task.fromJson(json)).toList());
-    return _tasksStream!;
+    if (!_initialized) {
+      _initialized = true;
+      refreshTasks();
+    }
+    // Emit the cached data immediately for new listeners
+    Future.microtask(() {
+      if (_cachedTasks.isNotEmpty) {
+        _tasksController.add(_cachedTasks);
+      }
+    });
+    return _tasksController.stream;
   }
 
-  /// Forces a fresh stream (call after add/update/delete to guarantee refresh)
-  void invalidateStream() {
-    _tasksStream = null;
+  Future<void> refreshTasks() async {
+    try {
+      final response = await _client
+          .from('tasks')
+          .select()
+          .order('created_at', ascending: false);
+
+      _cachedTasks =
+          (response as List).map((json) => Task.fromJson(json)).toList();
+      _tasksController.add(_cachedTasks);
+    } catch (e) {
+      _tasksController.addError(e);
+    }
   }
 
   Future<List<Task>> getTasks() async {
@@ -50,17 +68,33 @@ class SupabaseService {
     return (response as List).map((json) => Task.fromJson(json)).toList();
   }
 
-  Future<void> addTask(Task task) async {
-    await _client.from('tasks').insert(task.toJson());
-    invalidateStream();
+  /// Creates a task and returns the created record (with its ID)
+  Future<Task> addTask(Task task) async {
+    final response =
+        await _client.from('tasks').insert(task.toJson()).select().single();
+    final createdTask = Task.fromJson(response);
+    await refreshTasks();
+    return createdTask;
   }
 
   Future<void> toggleComplete(String id, bool status) async {
     await _client.from('tasks').update({'is_completed': status}).eq('id', id);
+    // Optimistic local update for instant UI feedback
+    _cachedTasks = _cachedTasks.map((t) {
+      if (t.id == id) return t.copyWith(isCompleted: status);
+      return t;
+    }).toList();
+    _tasksController.add(_cachedTasks);
+    // Also refresh from server to stay in sync
+    refreshTasks();
   }
 
   Future<void> deleteTask(String id) async {
     await _client.from('tasks').delete().eq('id', id);
+    // Optimistic local update
+    _cachedTasks = _cachedTasks.where((t) => t.id != id).toList();
+    _tasksController.add(_cachedTasks);
+    refreshTasks();
   }
 
   Future<Map<String, int>> getStats() async {
@@ -80,16 +114,14 @@ class SupabaseService {
   // ─── File Attachments ───
 
   Future<String> uploadFile(String taskId, File file) async {
-    final fileName = '${DateTime.now().millisecondsSinceEpoch}_${p.basename(file.path)}';
+    final fileName =
+        '${DateTime.now().millisecondsSinceEpoch}_${p.basename(file.path)}';
     final storagePath = '$taskId/$fileName';
 
-    await _client.storage
-        .from('task-attachments')
-        .upload(storagePath, file);
+    await _client.storage.from('task-attachments').upload(storagePath, file);
 
-    final publicUrl = _client.storage
-        .from('task-attachments')
-        .getPublicUrl(storagePath);
+    final publicUrl =
+        _client.storage.from('task-attachments').getPublicUrl(storagePath);
 
     return publicUrl;
   }
@@ -103,5 +135,6 @@ class SupabaseService {
     await _client.from('tasks').update({
       'attachments': attachments.map((a) => a.toJson()).toList(),
     }).eq('id', taskId);
+    await refreshTasks();
   }
 }

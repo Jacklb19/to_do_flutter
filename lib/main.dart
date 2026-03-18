@@ -7,7 +7,7 @@ import 'main_navigation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   await dotenv.load(fileName: ".env");
 
   await Supabase.initialize(
@@ -31,15 +31,14 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: AppColors.primary,
           primary: AppColors.primary,
-          background: AppColors.background,
         ),
         textTheme: GoogleFonts.nunitoTextTheme(),
-        scaffoldBackgroundColor: AppColors.background,
+        scaffoldBackgroundColor: AppColors.greyLight,
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.transparent,
           elevation: 0,
           titleTextStyle: TextStyle(
-            color: AppColors.textDark,
+            color: Colors.white,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),

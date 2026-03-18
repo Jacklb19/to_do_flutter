@@ -15,15 +15,15 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const AllTasksScreen(),
-    const StatsScreen(),
-    const AddTaskScreen(), // This is just a placeholder for the index, we'll navigate to it
+  final List<Widget> _screens = const [
+    HomeScreen(),
+    AllTasksScreen(),
+    StatsScreen(),
   ];
 
   void _onTap(int index) {
     if (index == 3) {
+      // Navigate to AddTaskScreen and refresh when returning
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const AddTaskScreen()),
@@ -40,7 +40,7 @@ class _MainNavigationState extends State<MainNavigation> {
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: _screens.sublist(0, 3), // Only stack the first 3 screens
+        children: _screens,
       ),
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: _currentIndex,

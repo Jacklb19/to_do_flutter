@@ -20,72 +20,93 @@ class TaskCard extends StatelessWidget {
       key: Key(task.id ?? task.title),
       direction: DismissDirection.endToStart,
       background: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8),
+        margin: const EdgeInsets.symmetric(vertical: 6),
         decoration: BoxDecoration(
           color: AppColors.accentRed,
           borderRadius: BorderRadius.circular(20),
         ),
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: const Icon(Icons.delete, color: Colors.white),
+        child: const Icon(Icons.delete_outline, color: Colors.white, size: 24),
       ),
       onDismissed: (_) => onDelete(),
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.symmetric(vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
         child: Row(
           children: [
-            Transform.scale(
-              scale: 1.2,
-              child: Checkbox(
-                value: task.isCompleted,
-                onChanged: onToggle,
-                activeColor: AppColors.primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
+            // Circular checkbox
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => onToggle(!task.isCompleted),
+              child: Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: task.isCompleted
+                      ? AppColors.primary
+                      : Colors.transparent,
+                  border: Border.all(
+                    color: task.isCompleted
+                        ? AppColors.primary
+                        : AppColors.borderGrey,
+                    width: 2,
+                  ),
                 ),
-                side: const BorderSide(color: AppColors.greyLight, width: 2),
+                child: task.isCompleted
+                    ? const Icon(Icons.check, color: Colors.white, size: 16)
+                    : null,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 16),
+            // Title — NO strikethrough, just normal text
             Expanded(
               child: Text(
                 task.title,
                 style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textDark.withOpacity(task.isCompleted ? 0.4 : 1.0),
-                  fontFamily: 'Nunito',
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: task.isCompleted
+                      ? AppColors.greyText
+                      : AppColors.textDark,
                 ),
               ),
             ),
+            // Time badge
             if (task.scheduledTime != null)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppColors.lightGreen,
-                  borderRadius: BorderRadius.circular(12),
+                  color: AppColors.timeChipBg,
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
                   _formatTime(task.scheduledTime!),
                   style: const TextStyle(
                     color: AppColors.primary,
                     fontWeight: FontWeight.bold,
-                    fontSize: 13,
+                    fontSize: 12,
                   ),
                 ),
               ),
+            // Attachment indicator
+            if (task.attachments.isNotEmpty) ...[
+              const SizedBox(width: 8),
+              const Icon(Icons.attach_file, size: 16, color: AppColors.greyText),
+            ],
           ],
         ),
       ),

@@ -15,22 +15,31 @@ class CategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // "More" chip gets special green text regardless
+    final bool isMore = label.toLowerCase() == 'more';
+
     return GestureDetector(
       onTap: onSelected,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primary : Colors.white,
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.greyLight,
+            color: isSelected
+                ? AppColors.primary
+                : (isMore ? AppColors.primary : AppColors.borderGrey),
+            width: 1.5,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : AppColors.greyText,
-            fontWeight: FontWeight.bold,
+            color: isSelected
+                ? Colors.white
+                : (isMore ? AppColors.primary : AppColors.textDark),
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
           ),
         ),
       ),

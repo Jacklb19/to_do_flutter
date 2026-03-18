@@ -10,5 +10,8 @@ class AppColors {
   static const Color greyLight = Color(0xFFF5F5F5);
   static const Color greyText = Color(0xFF9E9E9E);
   static const Color timeChipBg = Color(0xFFFFF8E7);
+  static const Color timeChipTextMorning = Color(0xFFD6A033);
+  static const Color timeChipBgAfternoon = Color(0xFFE8F8F0);
+  static const Color timeChipTextAfternoon = Color(0xFF2DC98A);
   static const Color borderGrey = Color(0xFFE8E8E8);
 }

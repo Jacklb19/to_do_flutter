@@ -16,6 +16,8 @@ class TaskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMorning = task.scheduledTime != null && task.scheduledTime!.hour < 12;
+
     return Dismissible(
       key: Key(task.id ?? task.title),
       direction: DismissDirection.endToStart,
@@ -32,7 +34,7 @@ class TaskCard extends StatelessWidget {
       onDismissed: (_) => onDelete(),
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
@@ -54,19 +56,19 @@ class TaskCard extends StatelessWidget {
                 width: 28,
                 height: 28,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
+                  borderRadius: BorderRadius.circular(8),
                   color: task.isCompleted
-                      ? AppColors.primary
+                      ? AppColors.lightGreen
                       : Colors.transparent,
                   border: Border.all(
                     color: task.isCompleted
-                        ? AppColors.primary
+                        ? Colors.transparent
                         : AppColors.borderGrey,
                     width: 2,
                   ),
                 ),
                 child: task.isCompleted
-                    ? const Icon(Icons.check, color: Colors.white, size: 16)
+                    ? const Icon(Icons.check, color: AppColors.primary, size: 18)
                     : null,
               ),
             ),
@@ -88,15 +90,15 @@ class TaskCard extends StatelessWidget {
             if (task.scheduledTime != null)
               Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
-                  color: AppColors.timeChipBg,
+                  color: isMorning ? AppColors.timeChipBg : AppColors.timeChipBgAfternoon,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
                   _formatTime(task.scheduledTime!),
-                  style: const TextStyle(
-                    color: AppColors.primary,
+                  style: TextStyle(
+                    color: isMorning ? AppColors.timeChipTextMorning : AppColors.timeChipTextAfternoon,
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
                   ),

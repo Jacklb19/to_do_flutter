@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/colors.dart';
 import '../models/task_model.dart';
+import '../screens/task_detail_screen.dart';
 
 class TaskCard extends StatelessWidget {
   final Task task;
@@ -32,22 +33,31 @@ class TaskCard extends StatelessWidget {
         child: const Icon(Icons.delete_outline, color: Colors.white, size: 24),
       ),
       onDismissed: (_) => onDelete(),
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TaskDetailScreen(task: task),
             ),
-          ],
-        ),
-        child: Row(
-          children: [
+          );
+        },
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
             // Circular checkbox
             GestureDetector(
               behavior: HitTestBehavior.opaque,
@@ -112,6 +122,7 @@ class TaskCard extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 

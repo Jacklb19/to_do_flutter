@@ -97,24 +97,30 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     });
   }
 
-  String _getFileIcon(String extension) {
+  Widget _getFileIcon(String extension) {
+    IconData iconData;
     switch (extension.toLowerCase()) {
       case 'pdf':
-        return '📄';
+        iconData = Icons.picture_as_pdf;
+        break;
       case 'jpg':
       case 'jpeg':
       case 'png':
       case 'gif':
-        return '🖼️';
+        iconData = Icons.image_outlined;
+        break;
       case 'doc':
       case 'docx':
-        return '📝';
+        iconData = Icons.description_outlined;
+        break;
       case 'xls':
       case 'xlsx':
-        return '📊';
+        iconData = Icons.table_chart_outlined;
+        break;
       default:
-        return '📎';
+        iconData = Icons.attach_file;
     }
+    return Icon(iconData, color: AppColors.primary, size: 24);
   }
 
   Future<void> _saveTask() async {
@@ -268,7 +274,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                               index < _selectedFiles.length - 1 ? 8.0 : 0),
                       child: Row(
                         children: [
-                          Text(_getFileIcon(ext), style: const TextStyle(fontSize: 18)),
+                          _getFileIcon(ext),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(

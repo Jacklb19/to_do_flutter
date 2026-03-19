@@ -4,6 +4,7 @@ import '../core/supabase_service.dart';
 import '../models/task_model.dart';
 import '../widgets/task_card.dart';
 import '../widgets/circular_progress_card.dart';
+import 'stats_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -35,11 +36,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // ─── Circular Progress Card ───
-                  CircularProgressCard(
-                    progress: progress,
-                    title: "Weekly Tasks",
-                    completedTasks: completedCount,
-                    pendingTasks: pendingCount,
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const StatsScreen(),
+                        ),
+                      );
+                    },
+                    child: CircularProgressCard(
+                      progress: progress,
+                      title: "Weekly Tasks",
+                      completedTasks: completedCount,
+                      pendingTasks: pendingCount,
+                    ),
                   ),
 
                   const SizedBox(height: 28),

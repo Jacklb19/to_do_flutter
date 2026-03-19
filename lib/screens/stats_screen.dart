@@ -78,7 +78,7 @@ class StatsScreen extends StatelessWidget {
                   child: BarChart(
                     BarChartData(
                       alignment: BarChartAlignment.spaceAround,
-                      maxY: 10,
+                      maxY: _getMaxY(tasks),
                       barTouchData: BarTouchData(enabled: false),
                       titlesData: FlTitlesData(
                         show: true,
@@ -112,7 +112,7 @@ class StatsScreen extends StatelessWidget {
                       ),
                       gridData: const FlGridData(show: false),
                       borderData: FlBorderData(show: false),
-                      barGroups: _generateBarGroups(),
+                      barGroups: _generateBarGroups(tasks),
                     ),
                   ),
                 ),
@@ -142,14 +142,48 @@ class StatsScreen extends StatelessWidget {
     );
   }
 
-  List<BarChartGroupData> _generateBarGroups() {
+  double _getMaxY(List<Task> tasks) {
+    int max = 0;
+    for (var count in _getCompletedPerDay(tasks)) {
+      if (count > max) max = count;
+    }
+    return max > 10 ? max.toDouble() : 10;
+  }
+
+  List<int> _getCompletedPerDay(List<Task> tasks) {
+    List<int> completedPerDay = List.filled(7, 0);
+    final now = DateTime.now();
+    // Start of current week (Monday)
+    final startOfWeek = DateTime(now.year, now.month, now.day).subtract(Duration(days: now.weekday - 1));
+    final endOfWeek = startOfWeek.add(const Duration(days: 6));
+    
+    for (var task in tasks) {
+      if (task.isCompleted && task.scheduledDate != null) {
+        final date = task.scheduledDate!;
+        final taskDate = DateTime(date.year, date.month, date.day);
+        if (taskDate.isAfter(startOfWeek.subtract(const Duration(days: 1))) && 
+            taskDate.isBefore(endOfWeek.add(const Duration(days: 1)))) {
+           final dayIndex = date.weekday - 1; // 1 (Mon) -> 0, 7 (Sun) -> 6
+           if (dayIndex >= 0 && dayIndex < 7) {
+             completedPerDay[dayIndex]++;
+           }
+        }
+      }
+    }
+    return completedPerDay;
+  }
+
+  List<BarChartGroupData> _generateBarGroups(List<Task> tasks) {
+    final completedPerDay = _getCompletedPerDay(tasks);
+    final todayIndex = DateTime.now().weekday - 1;
+
     return List.generate(7, (i) {
       return BarChartGroupData(
         x: i,
         barRods: [
           BarChartRodData(
-            toY: (i % 5 + 3).toDouble(),
-            color: i % 2 == 0
+            toY: completedPerDay[i].toDouble(),
+            color: i == todayIndex
                 ? AppColors.primary
                 : AppColors.primary.withValues(alpha: 0.3),
             width: 14,
